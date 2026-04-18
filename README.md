@@ -112,3 +112,38 @@ npm start
 - Create `server/.env.example` documenting required environment variables.
 - Optionally add CI/CD via GitHub Actions or an Azure deployment workflow.
 
+## Repository secrets and Azure publish profile
+This repository uses GitHub Actions to build the `client` and deploy the project to Azure App Service. The workflow requires two repository secrets:
+
+- `AZURE_WEBAPP_NAME` — the name of the Azure Web App (App Service) to deploy to.
+- `AZURE_PUBLISH_PROFILE` — the publish profile XML for the Azure Web App. The publish profile contains credentials used by the GitHub action to deploy.
+
+Steps to add the required GitHub secrets:
+
+1. Open the repository on GitHub and go to `Settings` → `Secrets and variables` → `Actions` → `New repository secret`.
+2. Create a secret named `AZURE_WEBAPP_NAME` and set its value to the App Service name (for example: `my-mern-app`).
+3. Create a secret named `AZURE_PUBLISH_PROFILE` and paste the entire contents of the downloaded publish profile file (an XML file) as the value.
+
+How to obtain the Azure publish profile:
+
+1. In the Azure Portal navigate to the target Web App (App Service).
+2. On the Web App page, select `Get publish profile` (usually located in the Overview or Get publish profile action). This downloads a `.PublishSettings` file.
+3. Open the `.PublishSettings` file in a text editor and copy its full contents.
+4. Paste the copied XML into the `AZURE_PUBLISH_PROFILE` secret value on GitHub and save.
+
+Additional Azure configuration notes:
+
+- Add `MONGO_URI` and any other environment variables in the Web App -> Configuration -> Application settings on the Azure Portal. These values are injected into the running app at runtime.
+- The App Service `PORT` is provided by Azure; the server code already reads `process.env.PORT` and falls back to `3000` for local testing.
+
+Verifying deployment and troubleshooting:
+
+- After pushing to `main`, check the Actions tab on GitHub. The workflow run will show logs for dependency install, client build, and deploy steps.
+- If deployment fails, review the `azure/webapps-deploy` step logs for the publish/profile authentication errors or file upload issues.
+- On Azure, use the Web App `Log stream` and `Deployment center` logs to diagnose runtime or deployment errors.
+
+Security reminder:
+
+- Never commit secrets or `.env` files containing credentials. Keep `server/.env` in `.gitignore` and only keep `server/.env.example` (without real values) in the repo.
+
+
