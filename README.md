@@ -112,6 +112,28 @@ npm start
 - Create `server/.env.example` documenting required environment variables.
 - Optionally add CI/CD via GitHub Actions or an Azure deployment workflow.
 
+## Alternate deployment methods
+The repository includes optional artifacts for different deployment approaches:
+
+- `Dockerfile` (repo root): multi-stage Dockerfile that builds the React `client` and runs the `server`. Useful for containerized deployments (Azure Container Instances, Azure Web App for Containers, or other container hosts).
+
+   Build and run locally:
+   ```powershell
+   cd 'c:\Users\( F r E a K )\gomycode\mern-azure-app'
+   docker build -t mern-azure-app:latest .
+   docker run -p 3000:3000 -e MONGO_URI="<uri>" mern-azure-app:latest
+   ```
+
+- `server/web.config`: configuration for Azure App Service on Windows using IISNode. Place this file in the `server` folder so that `server.js` is used as the application entry point when deploying to Windows-based App Service.
+
+- `Procfile` (repo root): `web: node server/server.js` — useful for platforms that respect Procfile conventions (Heroku, some CI deployers).
+
+Choose the artifact that best matches the target environment. For Azure App Service, prefer:
+
+- Linux App Service with the GitHub Actions workflow already included (recommended), or
+- App Service on Windows with `server/web.config` if using a Windows plan.
+
+
 ## Repository secrets and Azure publish profile
 This repository uses GitHub Actions to build the `client` and deploy the project to Azure App Service. The workflow requires two repository secrets:
 
